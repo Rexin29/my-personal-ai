@@ -1,0 +1,7 @@
+python-dotenv>=1.0.0
+google-adk>=0.1.0    # placeholder - use the ADK client package you have access to
+google-cloud-aiplatform>=1.28.0  # if you integrate Vertex
+chromadb>=0.3.0
+pinecone-client>=2.2.0
+SQLAlchemy>=1.4
+psycopg2-binary>=2.9  # only for Postgres use
