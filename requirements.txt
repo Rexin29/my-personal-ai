@@ -5,3 +5,5 @@ chromadb>=0.3.0
 pinecone-client>=2.2.0
 SQLAlchemy>=1.4
 psycopg2-binary>=2.9  # only for Postgres use
+pdfminer.six>=20201018
+sentence-transformers>=2.2.2

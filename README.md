@@ -1,46 +1,37 @@
-# Educational Agent (Google ADK + RAG + Syllabus DB)
+### Ingestion & Migration additions
 
-This project provides a Python ADK-based agent that routes student queries to either:
-- a Vector Retrieval (RAG) tool (Chroma / Pinecone / Vertex), or
-- a Structured Syllabus Database (Postgres / SQLite).
+I added SQL migration and seed data, plus a notes ingestion script and helper utilities.
 
-Files:
-- main.py — entrypoint and CLI
-- agent.py — RootOrchestratorAgent with routing & composition logic
-- tools/vector_tool.py — vector DB wrapper (Chroma / Pinecone / Vertex)
-- tools/db_tool.py — syllabus DB wrapper (SQLAlchemy)
-- requirements.txt, .env.example, README.md
+New files added:
+- db/migrations/001_create_subjects.sql — creates the `subjects` table (SQLite compatible)
+- db/seeds/subjects_seed.csv — 5 example rows (id,semester,subject_name,course_code,topics,credits)
+- scripts/ingest_notes.py — PDF -> chunk -> embed -> upsert script (Chroma + Gemini embeddings)
+- tools/ingest_utils.py — helper functions for PDF extraction, chunking, embeddings, and Chroma upsert
 
-Quick start
-1. Install dependencies
-   python -m pip install -r requirements.txt
+Requirements updated to include pdfminer.six and sentence-transformers.
 
-2. Set environment variables (copy .env.example -> .env) and populate:
-   - GOOGLE_API_KEY (required)
-   - VECTOR_DB_TYPE and its credentials / endpoint
-   - DATABASE_URL (e.g. sqlite:///syllabus.db or postgres://user:pw@host/dbname)
+How to run migration (SQLite):
 
-3. Prepare your data:
-   - Structured syllabus: create a 'subjects' table with columns like
-     id, semester (int), subject_name (text), course_code (text), topics (text/json), credits
-     You can use SQL scripts or ORM migrations to populate it.
+1. Create the SQLite DB file (if not present) and apply the SQL migration:
+   sqlite3 syllabus.db < db/migrations/001_create_subjects.sql
 
-   - Notes (RAG pipeline): extract text from lectures/slides/PDFs, chunk, create embeddings,
-     and upsert into your chosen vector DB. For Chroma, create a collection "semester_notes"
-     and set metadata like {"source": filename} for each doc chunk.
+2. Import seed CSV (example using sqlite3):
+   sqlite3 syllabus.db
+   .mode csv
+   .import db/seeds/subjects_seed.csv subjects
 
-4. Run the CLI:
-   python main.py
+3. Verify:
+   SELECT count(*) FROM subjects;
 
-Design notes
-- The agent class uses the model to classify routing decisions into SYLLABUS vs NOT_SYLLABUS.
-  This helps avoid hallucinating syllabus details for queries that should be answered directly from structured data.
+How to ingest notes into Chroma with Gemini embeddings
 
-- The RAG prompt includes retrieved passages and asks the model to cite them.
+1. Ensure Chroma is running (or accessible). By default the script attempts to reach VECTOR_DB_ENDPOINT or http://localhost:8000.
 
-Next steps & production considerations
-- Implement authentication, rate-limiting, and usage logging.
-- Add tests and CI.
-- Move to a server with an API if you want a web interface.
-- Implement secure key & secret management (don't store secrets in plaintext).
-- Hook up an embeddings pipeline (Gemini embeddings or Vertex embeddings) to compute vectors.
+2. Populate .env with GOOGLE_API_KEY and optionally GEMINI_MODEL.
+
+3. Run the ingestion script on a directory of PDFs:
+   python scripts/ingest_notes.py --pdf-dir ./notes --source semester1
+
+Notes & caveats
+- The ingestion script prefers Gemini embeddings via google-adk. If the google-adk client or Gemini embeddings are not available, the script falls back to sentence-transformers locally.
+- Adjust chunk_size and overlap flags for your document type.

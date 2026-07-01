@@ -1,0 +1,6 @@
+id,semester,subject_name,course_code,topics,credits
+1,1,Introduction to Programming,CS101,"[\"Variables and Data Types\", \"Control Flow\", \"Functions\"]",3
+2,2,Data Structures,CS201,"[\"Arrays and Linked Lists\", \"Stacks and Queues\", \"Trees and Graphs\"]",4
+3,3,Algorithms,CS301,"[\"Sorting and Searching\", \"Greedy Algorithms\", \"Dynamic Programming\"]",4
+4,4,Database Systems,CS401,"[\"Relational Model\", \"SQL\", \"Normalization\"]",3
+5,5,Operating Systems,CS501,"[\"Processes and Threads\", \"Scheduling\", \"Memory Management\"]",4
